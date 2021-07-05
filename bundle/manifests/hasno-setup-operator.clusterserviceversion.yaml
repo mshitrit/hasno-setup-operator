@@ -92,6 +92,12 @@ spec:
                 control-plane: controller-manager
             spec:
               containers:
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                    -NET_RAW
               - args:
                 - --secure-listen-address=0.0.0.0:8443
                 - --upstream=http://127.0.0.1:8080/
@@ -130,8 +136,6 @@ spec:
                   requests:
                     cpu: 100m
                     memory: 20Mi
-                securityContext:
-                  allowPrivilegeEscalation: false
               securityContext:
                 runAsNonRoot: true
               serviceAccountName: hasno-setup-operator-controller-manager
