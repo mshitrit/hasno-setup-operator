@@ -28,8 +28,17 @@ type HALayerSetSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of HALayerSet. Edit halayerset_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	//SNO1IP is the IP of the first single node openshift cluster
+	SNO1IP string `json:"sno1ip"`
+
+	//SNO2IP is the IP of the second single node openshift cluster
+	SNO2IP string `json:"sno2ip"`
+
+	//KubeConfigPath1 is the path to the kubeconfig of the first single node openshift cluster
+	KubeConfigPath1 string `json:"kubeconfigpath1"`
+
+	//KubeConfigPath2 is the path to the kubeconfig of the second single node openshift cluster
+	KubeConfigPath2 string `json:"kubeconfigpath2"`
 }
 
 // HALayerSetStatus defines the observed state of HALayerSet
