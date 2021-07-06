@@ -1,0 +1,7 @@
+apiVersion: app.hasno.com/v1alpha1
+kind: HALayerSet
+metadata:
+  name: halayerset-sample
+spec:
+  # Add fields here
+  foo: bar
