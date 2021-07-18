@@ -28,17 +28,18 @@ type HALayerSetSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	//SNO1IP is the IP of the first single node openshift cluster
-	SNO1IP string `json:"sno1ip"`
+	//Node1Address is the ip address used by the first node in the cluster.
+	Node1Address string `json:"node1address"`
 
-	//SNO2IP is the IP of the second single node openshift cluster
-	SNO2IP string `json:"sno2ip"`
+	//Node2Address is the ip address used by the second node in the cluster.
+	Node2Address string `json:"node2address"`
 
-	//KubeConfigPath1 is the path to the kubeconfig of the first single node openshift cluster
-	KubeConfigPath1 string `json:"kubeconfigpath1"`
+	//NodeName is the name of the node used in current SNO cluster (either cluster1 or cluster2).
+	NodeName string `json:"nodename"`
 
-	//KubeConfigPath2 is the path to the kubeconfig of the second single node openshift cluster
-	KubeConfigPath2 string `json:"kubeconfigpath2"`
+	//TODO mshitrit use a Secret object
+	//AuthKey is the authkey used by both sno clusters.
+	AuthKey string `json:"authkey"`
 }
 
 // HALayerSetStatus defines the observed state of HALayerSet

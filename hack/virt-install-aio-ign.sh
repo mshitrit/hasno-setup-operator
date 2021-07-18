@@ -5,7 +5,7 @@ set -x
 # $ sudo gunzip /tmp/rhcos-46.82.202007051540-0-qemu.x86_64.qcow2.gz
 
 VM_NAME="$1"
-DOMAIN="example.com"
+DOMAIN="hasno.com"
 CLUSTER_NAME="cluster1"
 IGNITION_CONFIG="/var/lib/libvirt/images/aio.ign"
 cp "${VM_NAME}/aio.ign" "${IGNITION_CONFIG}"
@@ -18,8 +18,8 @@ INSTALL_ISO="/home/qemu-virt/discovery_image_${CLUSTER_NAME}.iso"
 OS_VARIANT="rhel8.1"
 VCPUS="8"
 # RAM_MB="16384"
-RAM_MB="24576"
-DISK_GB="60"
+RAM_MB="32768"
+DISK_GB="120"
 DISK="/home/qemu-virt/${VM_NAME}.cow"
 rm -f "${DISK}"
 
@@ -53,10 +53,10 @@ DNS=$(grep baseDomain install-config-${VM_NAME}.yaml | cut -d: -f2 | tr -d ' \t'
 
 echo "" > /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
 if [ ${VM_NAME} = ${CLUSTER_NAME} ]; then
-        echo "address=/.${CLUSTER_NAME}.${DOMAIN}/${network}.${ip}" >> /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
+        echo "address=/api.${CLUSTER_NAME}.${DOMAIN}/${network}.${ip}" >> /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
         # echo "address=/.${VM_NAME}.${DNS}/${network}.${ip}" > /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
 fi
-echo "address=/.${VM_NAME}/${network}.${ip}" >> /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
+#echo "address=/.${VM_NAME}/${network}.${ip}" >> /etc/NetworkManager/dnsmasq.d/${VM_NAME}.conf
 sudo systemctl reload NetworkManager.service
 
 echo "Installing ${VM_NAME} ( $MAC ) @ ${network}.${ip}"

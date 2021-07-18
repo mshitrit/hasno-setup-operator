@@ -49,6 +49,12 @@ type HALayerSetReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *HALayerSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	//Assumptions
+	//Clusters names are cluster1 & cluster2
+	//Cluster domain is shared by both clusters
+
+	//TODO mshitrit after phase1 is working consider exporting some of the assumptions
+
 	log := r.Log.WithValues("halayerset", req.NamespacedName)
 	log.Info("reconciling...")
 	// your logic here
@@ -58,22 +64,14 @@ func (r *HALayerSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	if err := r.Client.Get(ctx, key, setupResource); err != nil {
 		//TODO mshitrit handle error
 	}
-	//Extract & Set the Ips as env vars
-	if err := os.Setenv(envVarIP1, setupResource.Spec.SNO1IP); err != nil {
-		//TODO mshitrit handle error
-	}
-	if err := os.Setenv(envVarIP2, setupResource.Spec.SNO2IP); err != nil {
-		//TODO mshitrit handle error
-	}
+	//Needed Data on CR
+	r.setEnvVars(setupResource)
 
-	//Extract & Set the kubeconfig path as env vars
-	if err := os.Setenv(envVarKubeconfig1, setupResource.Spec.KubeConfigPath1); err != nil {
-		//TODO mshitrit handle error
-	}
-	if err := os.Setenv(envVarKubeconfig2, setupResource.Spec.KubeConfigPath2); err != nil {
-		//TODO mshitrit handle error
-	}
-	//run make cluster
+	//create a new manifest based on pod-cluster.yaml where the env vars are injected.
+	//envsubst < pod-cluster.yaml > pod-cluster-new.yaml
+
+	//create a pod with the new manifest
+
 	//run make csr-cluster1 csr-cluster
 	//set up fencing
 	//test ?
@@ -81,11 +79,34 @@ func (r *HALayerSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return ctrl.Result{}, nil
 }
 
+func (r *HALayerSetReconciler) setEnvVars(setupResource *appv1alpha1.HALayerSet) {
+	//Cluster Name
+	//Cluster1 IP
+	//Cluster2 IP
+	//AUTH (shared for both)
+	//Extract & Set the Cluster Domain as env vars
+	if err := os.Setenv(envVarNodeName, setupResource.Spec.NodeName); err != nil {
+		//TODO mshitrit handle error
+	}
+
+	if err := os.Setenv(envVarNode1Addr, setupResource.Spec.Node1Address); err != nil {
+		//TODO mshitrit handle error
+	}
+
+	if err := os.Setenv(envVarNode2Addr, setupResource.Spec.Node2Address); err != nil {
+		//TODO mshitrit handle error
+	}
+
+	if err := os.Setenv(envVarAuthKey, setupResource.Spec.AuthKey); err != nil {
+		//TODO mshitrit handle error
+	}
+}
+
 const (
-	envVarIP1         = "SNO1_IP"
-	envVarIP2         = "SNO2_IP"
-	envVarKubeconfig1 = "SNO1_KUBECONFIG"
-	envVarKubeconfig2 = "SNO2_KUBECONFIG"
+	envVarNode1Addr = "NODE1ADDR"
+	envVarNode2Addr = "NODE2ADDR"
+	envVarNodeName  = "NODENAME"
+	envVarAuthKey   = "AUTHKEY"
 )
 
 // SetupWithManager sets up the controller with the Manager.
