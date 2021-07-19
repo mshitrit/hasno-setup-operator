@@ -36,10 +36,27 @@ spec:
           spec:
             description: HALayerSetSpec defines the desired state of HALayerSet
             properties:
-              foo:
-                description: Foo is an example field of HALayerSet. Edit halayerset_types.go
-                  to remove/update
+              authkey:
+                description: TODO mshitrit use a Secret object AuthKey is the authkey
+                  used by both sno clusters.
                 type: string
+              node1address:
+                description: Node1Address is the ip address used by the first node
+                  in the cluster.
+                type: string
+              node2address:
+                description: Node2Address is the ip address used by the second node
+                  in the cluster.
+                type: string
+              nodename:
+                description: NodeName is the name of the node used in current SNO
+                  cluster (either cluster1 or cluster2).
+                type: string
+            required:
+            - authkey
+            - node1address
+            - node2address
+            - nodename
             type: object
           status:
             description: HALayerSetStatus defines the observed state of HALayerSet
