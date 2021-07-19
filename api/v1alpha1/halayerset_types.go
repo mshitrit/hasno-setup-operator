@@ -28,8 +28,18 @@ type HALayerSetSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of HALayerSet. Edit halayerset_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	//Node1Address is the ip address used by the first node in the cluster.
+	Node1Address string `json:"node1address"`
+
+	//Node2Address is the ip address used by the second node in the cluster.
+	Node2Address string `json:"node2address"`
+
+	//NodeName is the name of the node used in current SNO cluster (either cluster1 or cluster2).
+	NodeName string `json:"nodename"`
+
+	//TODO mshitrit use a Secret object
+	//AuthKey is the authkey used by both sno clusters.
+	AuthKey string `json:"authkey"`
 }
 
 // HALayerSetStatus defines the observed state of HALayerSet

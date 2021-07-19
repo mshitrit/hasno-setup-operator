@@ -88,13 +88,13 @@ spec:
   hostAliases:
   - ip: "$NODE1ADDR"
     hostnames:
-    - "$NODE1NAME"
+    - cluster1
   - ip: "$NODE2ADDR"
     hostnames:
-    - "$NODE2NAME"
+    - cluster2
   containers:
   - name: system
-    image: $IMAGE
+    image: quay.io/omular/pcmk:test
     imagePullPolicy: Always
     command: ["/usr/lib/systemd/systemd", "--system"]
     volumeMounts:
@@ -107,7 +107,7 @@ spec:
     securityContext:
       privileged: true
   - name: corosync
-    image: $IMAGE
+    image: quay.io/omular/pcmk:test
     imagePullPolicy: Always
     command: [ '/usr/sbin/corosync', '-f']
     securityContext:
@@ -116,7 +116,7 @@ spec:
     - name: cluster-state
       mountPath: /etc/corosync
   - name: pacemaker
-    image: $IMAGE
+    image: quay.io/omular/pcmk:test
     imagePullPolicy: Always
     command: [ '/usr/sbin/pacemakerd', '-f' ]
     volumeMounts:
@@ -126,7 +126,7 @@ spec:
       mountPath: /var/lib/pacemaker
   initContainers:
   - name: init
-    image: $IMAGE
+    image: quay.io/omular/pcmk:test
     imagePullPolicy: Always
     command: [ '/root/setup.sh']
     securityContext:
@@ -142,20 +142,20 @@ spec:
       mountPath: /var/lib/pcsd
     - name: secret-volume
       readOnly: true
-      mountPath: "$SECRETS_DIR"
+      mountPath: "/etc/secret-volume"
     env:
     - name: NODE1NAME
-      value: "$NODE1NAME"
+      value: cluster1
     - name: NODE1ADDR
       value: "$NODE1ADDR"
     - name: NODE2NAME
-      value: "$NODE2NAME"
+      value: cluster2
     - name: NODE2ADDR
       value: "$NODE2ADDR"
     - name: CLUSTER_NAME
       value: "aio-pair"
     - name: SECRETS_DIR
-      value: "$SECRETS_DIR"
+      value: "/etc/secret-volume"
 ---
 apiVersion: apps/v1
 kind: Deployment
