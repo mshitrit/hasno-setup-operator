@@ -17,7 +17,9 @@ limitations under the License.
 package controllers
 
 import (
+	"os"
 	"path/filepath"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
@@ -40,6 +42,13 @@ import (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
+var spyReconciler SpyHALayerSetReconciler
+
+const (
+	envVarApiServer = "TEST_ASSET_KUBE_APISERVER"
+	envVarETCD      = "TEST_ASSET_ETCD"
+	envVarKUBECTL   = "TEST_ASSET_KUBECTL"
+)
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -50,6 +59,16 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	if _, isFound := os.LookupEnv(envVarApiServer); !isFound {
+		Expect(os.Setenv(envVarApiServer, "../testbin/bin/kube-apiserver")).To(Succeed())
+	}
+	if _, isFound := os.LookupEnv(envVarETCD); !isFound {
+		Expect(os.Setenv(envVarETCD, "../testbin/bin/etcd")).To(Succeed())
+	}
+	if _, isFound := os.LookupEnv(envVarKUBECTL); !isFound {
+		Expect(os.Setenv(envVarKUBECTL, "../testbin/bin/kubectl")).To(Succeed())
+	}
+
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
@@ -67,14 +86,37 @@ var _ = BeforeSuite(func() {
 
 	//+kubebuilder:scaffold:scheme
 
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	Expect(err).NotTo(HaveOccurred())
-	Expect(k8sClient).NotTo(BeNil())
+	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+		Scheme: scheme.Scheme,
+	})
+	Expect(err).ToNot(HaveOccurred())
 
+	haReconciler := &HALayerSetReconciler{
+		Client: k8sManager.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("halayerset-controller"),
+	}
+	spyReconciler = SpyHALayerSetReconciler{haReconciler}
+	err = spyReconciler.SetupWithManager(k8sManager)
+	Expect(err).ToNot(HaveOccurred())
+
+	go func() {
+		defer GinkgoRecover()
+		err = k8sManager.Start(ctrl.SetupSignalHandler())
+		Expect(err).ToNot(HaveOccurred())
+	}()
+
+	k8sClient = k8sManager.GetClient()
+	Expect(k8sClient).ToNot(BeNil())
+	beforeSuite()
 }, 60)
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
+	afterSuite()
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+
+	Expect(os.Unsetenv(envVarApiServer)).To(Succeed())
+	Expect(os.Unsetenv(envVarETCD)).To(Succeed())
+	Expect(os.Unsetenv(envVarKUBECTL)).To(Succeed())
 })

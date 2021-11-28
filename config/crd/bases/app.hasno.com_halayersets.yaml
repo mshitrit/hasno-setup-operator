@@ -36,10 +36,66 @@ spec:
           spec:
             description: HALayerSetSpec defines the desired state of HALayerSet
             properties:
-              foo:
-                description: Foo is an example field of HALayerSet. Edit halayerset_types.go
-                  to remove/update
-                type: string
+              deployments:
+                description: Deployments is a list of deployments that will be managed
+                  by the created HA layer.
+                items:
+                  type: string
+                type: array
+              fenceAgentsSpec:
+                description: FenceAgentsSpec list of fence agent to use during HA
+                  layer fencing setup.
+                items:
+                  description: FenceAgentSpec contains the necessary information for
+                    setting up the fence agent that will be used in the HA layer.
+                  properties:
+                    name:
+                      description: Name fence agent name.
+                      type: string
+                    params:
+                      additionalProperties:
+                        type: string
+                      description: 'Params parameters which are necessary when creating
+                        the fence agent, will be applied in the format: key1=value1
+                        key2=value2 ...'
+                      type: object
+                    type:
+                      description: Type of the fence agent.
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+              nodesSpec:
+                description: NodesSpec contain names and ips of both SNO clusters
+                  nodes.
+                properties:
+                  firstNodeIP:
+                    description: FirstNodeIP is the ip address used by the first node
+                      in the cluster.
+                    type: string
+                  firstNodeName:
+                    description: FirstNodeName is the name of the first node in the
+                      cluster.
+                    type: string
+                  secondNodeIP:
+                    description: SecondNodeIP is the ip address used by the second
+                      node in the cluster.
+                    type: string
+                  secondNodeName:
+                    description: SecondNodeName is the name of the second node in
+                      the cluster.
+                    type: string
+                required:
+                - firstNodeIP
+                - firstNodeName
+                - secondNodeIP
+                - secondNodeName
+                type: object
+            required:
+            - fenceAgentsSpec
+            - nodesSpec
             type: object
           status:
             description: HALayerSetStatus defines the observed state of HALayerSet

@@ -28,8 +28,36 @@ type HALayerSetSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of HALayerSet. Edit halayerset_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	//Deployments is a list of deployments that will be managed by the created HA layer.
+	Deployments []string `json:"deployments,omitempty"`
+
+	//FenceAgentsSpec list of fence agent to use during HA layer fencing setup.
+	FenceAgentsSpec []FenceAgentSpec `json:"fenceAgentsSpec"`
+
+	//NodesSpec contain names and ips of both SNO clusters nodes.
+	NodesSpec NodesSpec `json:"nodesSpec"`
+}
+
+// FenceAgentSpec contains the necessary information for setting up the fence agent that will be used in the HA layer.
+type FenceAgentSpec struct {
+	//Name fence agent name.
+	Name string `json:"name"`
+	//Type of the fence agent.
+	Type string `json:"type"`
+	//Params parameters which are necessary when creating the fence agent, will be applied in the format: key1=value1 key2=value2 ...
+	Params map[string]string `json:"params,omitempty"`
+}
+
+// NodesSpec contains names and ips of both SNO clusters nodes.
+type NodesSpec struct {
+	//FirstNodeName is the name of the first node in the cluster.
+	FirstNodeName string `json:"firstNodeName"`
+	//SecondNodeName is the name of the second node in the cluster.
+	SecondNodeName string `json:"secondNodeName"`
+	//FirstNodeIP is the ip address used by the first node in the cluster.
+	FirstNodeIP string `json:"firstNodeIP"`
+	//SecondNodeIP is the ip address used by the second node in the cluster.
+	SecondNodeIP string `json:"secondNodeIP"`
 }
 
 // HALayerSetStatus defines the observed state of HALayerSet

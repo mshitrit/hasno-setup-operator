@@ -24,21 +24,20 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 10001
-      automountServiceAccountToken: false
       containers:
-        capabilities:
-          drop:
-          -NET_RAW
       - command:
         - /manager
         args:
         - --leader-elect
         image: controller:latest
         name: manager
+        env:
+          - name: DEPLOYMENT_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
         securityContext:
           allowPrivilegeEscalation: false
-          runAsUser: 10001
         livenessProbe:
           httpGet:
             path: /healthz
@@ -54,9 +53,9 @@ spec:
         resources:
           limits:
             cpu: 100m
-            memory: 30Mi
+            memory: 500Mi
           requests:
             cpu: 100m
-            memory: 20Mi
+            memory: 300Mi
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10
