@@ -11,14 +11,49 @@ metadata:
             "name": "halayerset-sample"
           },
           "spec": {
-            "foo": "bar"
+            "deployments": [
+              "nginx-test",
+              "nginx-prod"
+            ],
+            "fenceAgentsSpec": [
+              {
+                "name": "fence_ipmilan_1",
+                "params": {
+                  "ip": "192.168.126.1",
+                  "ipport": "9111",
+                  "lanplus": "1",
+                  "password": "password",
+                  "pcmk_host_list": "cluster1",
+                  "username": "admin"
+                },
+                "type": "fence_ipmilan"
+              },
+              {
+                "name": "fence_ipmilan_2",
+                "params": {
+                  "ip": "192.168.126.1",
+                  "ipport": "9222",
+                  "lanplus": "1",
+                  "password": "password",
+                  "pcmk_host_list": "cluster2",
+                  "username": "admin"
+                },
+                "type": "fence_ipmilan"
+              }
+            ],
+            "nodesSpec": {
+              "firstNodeIP": "192.168.126.10",
+              "firstNodeName": "cluster1",
+              "secondNodeIP": "192.168.126.11",
+              "secondNodeName": "cluster2"
+            }
           }
         }
       ]
     capabilities: Basic Install
     operators.operatorframework.io/builder: operator-sdk-v1.7.1+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
-  name: hasno-setup-operator.v0.0.1
+  name: hasno-setup-operator.v0.0.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -66,6 +101,52 @@ spec:
           - patch
           - update
         - apiGroups:
+          - apps
+          resources:
+          - deployments
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - ""
+          resources:
+          - pods/exec
+          verbs:
+          - create
+        - apiGroups:
+          - ""
+          resources:
+          - serviceaccounts
+          verbs:
+          - create
+        - apiGroups:
+          - ""
+          resources:
+          - services
+          verbs:
+          - create
+          - delete
+          - list
+          - update
+          - watch
+        - apiGroups:
+          - rbac.authorization.k8s.io
+          resources:
+          - clusterrolebindings
+          verbs:
+          - create
+        - apiGroups:
           - authentication.k8s.io
           resources:
           - tokenreviews
@@ -92,12 +173,6 @@ spec:
                 control-plane: controller-manager
             spec:
               containers:
-                securityContext:
-                  allowPrivilegeEscalation: false
-                  readOnlyRootFilesystem: true
-                  capabilities:
-                    drop:
-                    -NET_RAW
               - args:
                 - --secure-listen-address=0.0.0.0:8443
                 - --upstream=http://127.0.0.1:8080/
@@ -115,7 +190,12 @@ spec:
                 - --leader-elect
                 command:
                 - /manager
-                image: controller:latest
+                env:
+                - name: DEPLOYMENT_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                image: quay.io/mshitrit/hasno-setup-operator:0.0.2
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -132,10 +212,12 @@ spec:
                 resources:
                   limits:
                     cpu: 100m
-                    memory: 30Mi
+                    memory: 500Mi
                   requests:
                     cpu: 100m
-                    memory: 20Mi
+                    memory: 300Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
               securityContext:
                 runAsNonRoot: true
               serviceAccountName: hasno-setup-operator-controller-manager

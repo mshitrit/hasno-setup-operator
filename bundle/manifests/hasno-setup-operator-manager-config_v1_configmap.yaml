@@ -14,5 +14,4 @@ data:
       resourceName: 71deb985.hasno.com
 kind: ConfigMap
 metadata:
-  namespace: hasno
   name: hasno-setup-operator-manager-config
